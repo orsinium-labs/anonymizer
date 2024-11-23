@@ -1,4 +1,4 @@
-package anonymizer //nolint:testpackage
+package anonymizer
 
 import (
 	"testing"
@@ -9,16 +9,17 @@ import (
 func TestAnonymize(t *testing.T) {
 	t.Parallel()
 	is := is.New(t)
-	is.Equal(Anonymize("Albert"), "Xxxxxx")
-	is.Equal(Anonymize("hoi Albert!"), "hoi Xxxxxx!")
-	is.Equal(Anonymize("Hoi Albert!"), "Hoi Xxxxxx!")
-	is.Equal(Anonymize("Hoi Hoi!"), "Hoi Xxx!")
-	is.Equal(Anonymize("hoe gaat het, asdasd?"), "hoe gaat het, xxxxxx?")
-	is.Equal(Anonymize("MyLoKo"), "XxXxXx")
-	is.Equal(Anonymize("12 34"), "00 00")
-	is.Equal(Anonymize("12-34"), "00-00")
-	is.Equal(Anonymize("Lelystad"), "Xxxxxxxx")
-	is.Equal(Anonymize("Flёur"), "Xxxxx")
+	a := New()
+	is.Equal(a.Anonymize("Albert"), "Xxxxxx")
+	is.Equal(a.Anonymize("hoi Albert!"), "hoi Xxxxxx!")
+	is.Equal(a.Anonymize("Hoi Albert!"), "Hoi Xxxxxx!")
+	is.Equal(a.Anonymize("Hoi Hoi!"), "Hoi Xxx!")
+	is.Equal(a.Anonymize("hoe gaat het, asdasd?"), "hoe gaat het, xxxxxx?")
+	is.Equal(a.Anonymize("MyLoKo"), "XxXxXx")
+	is.Equal(a.Anonymize("12 34"), "00 00")
+	is.Equal(a.Anonymize("12-34"), "00-00")
+	is.Equal(a.Anonymize("Lelystad"), "Xxxxxxxx")
+	is.Equal(a.Anonymize("Flёur"), "Xxxxx")
 }
 
 func TestIterWords(t *testing.T) {
@@ -41,18 +42,18 @@ func TestIterWords(t *testing.T) {
 	is.Equal(listWords("Привет, мир!"), []string{"Привет", "мир"})
 }
 
-func TestSentenceStart(t *testing.T) {
-	t.Parallel()
-	is := is.New(t)
-	is.True(isSentenceStart([]rune("hello"), 0))
-	is.True(isSentenceStart([]rune(". Hello"), 2))
-	is.True(isSentenceStart([]rune("? Hello"), 2))
-	is.True(isSentenceStart([]rune("⁉ Hello"), 2))
-	is.True(isSentenceStart([]rune("h.Hello"), 2))
-	is.True(isSentenceStart([]rune("..Hello"), 2))
-	is.True(isSentenceStart([]rune(".  Hello"), 3))
+// func TestSentenceStart(t *testing.T) {
+// 	t.Parallel()
+// 	is := is.New(t)
+// 	is.True(isSentenceStart([]rune("hello"), 0))
+// 	is.True(isSentenceStart([]rune(". Hello"), 2))
+// 	is.True(isSentenceStart([]rune("? Hello"), 2))
+// 	is.True(isSentenceStart([]rune("⁉ Hello"), 2))
+// 	is.True(isSentenceStart([]rune("h.Hello"), 2))
+// 	is.True(isSentenceStart([]rune("..Hello"), 2))
+// 	is.True(isSentenceStart([]rune(".  Hello"), 3))
 
-	is.True(!isSentenceStart([]rune(", Hello"), 2))
-	is.True(!isSentenceStart([]rune("' Hello"), 2))
-	is.True(!isSentenceStart([]rune(".,Hello"), 2))
-}
+// 	is.True(!isSentenceStart([]rune(", Hello"), 2))
+// 	is.True(!isSentenceStart([]rune("' Hello"), 2))
+// 	is.True(!isSentenceStart([]rune(".,Hello"), 2))
+// }

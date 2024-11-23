@@ -18,7 +18,7 @@ type Anonymizer struct {
 	Digit      rune
 }
 
-func NewAnonymizer() Anonymizer {
+func New() Anonymizer {
 	return Anonymizer{
 		Uppercase: 'X',
 		Lowercase: 'x',
