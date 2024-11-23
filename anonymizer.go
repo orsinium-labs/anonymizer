@@ -55,7 +55,7 @@ func (a Anonymizer) Anonymize(text string) string {
 		dict = getDict()
 	}
 	for span := range iterWords(runes) {
-		if shouldAnonymize(dict, runes, span) {
+		if shouldAnonymize(dict, span) {
 			a.mask(runes, span)
 		}
 	}
@@ -76,7 +76,7 @@ func (a Anonymizer) mask(runes []rune, span span) {
 }
 
 // Check if the word in the given span should be anonymized.
-func shouldAnonymize(dict *trie.Trie, runes []rune, span span) bool {
+func shouldAnonymize(dict *trie.Trie, span span) bool {
 	// If the first letter is uppercase and it's the beginning of a sentence,
 	// we want to make it lowercase.
 	word := span.word
@@ -120,6 +120,7 @@ func iterWords(runes []rune) iter.Seq[span] {
 				if !keepGoing {
 					break
 				}
+				terminal = -1
 			}
 			if unicode.In(r, unicode.Sentence_Terminal) {
 				terminal = i

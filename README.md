@@ -8,6 +8,12 @@ Supported languages:
 
 * NL (Dutch)
 
+## Example
+
+Input:
+
+> Good morning, Dr. Love. My name is Gram. I live in amsterdam, at kerkstraat 42. My social number is 123-456.
+
 ## Installation
 
 ```bash
