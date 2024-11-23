@@ -10,6 +10,13 @@ import (
 	"github.com/derekparker/trie"
 )
 
+type Config struct {
+	Langugage string
+	Uppercase rune
+	Lowercase rune
+	Digit     rune
+}
+
 //go:embed words/nl.txt
 var dutch string
 
@@ -27,12 +34,13 @@ func init() {
 }
 
 // Replace with a placeholder all non-dictionary words in the text.
-func Anonymize(text string) string {
+func Anonymize(text string, c Config) string {
+	c = initConfig(c)
 	// We work with binary instead of strings to reduce memory allocations.
 	runes := []rune(text)
 	for i, r := range runes {
 		if unicode.IsDigit(r) {
-			runes[i] = '0'
+			runes[i] = c.Digit
 		}
 	}
 	dict := getDict()
@@ -40,20 +48,33 @@ func Anonymize(text string) string {
 		if !shouldAnonymize(dict, runes, span) {
 			continue
 		}
-		mask(runes, span)
+		mask(runes, span, c)
 	}
 	return string(runes)
 }
 
+func initConfig(c Config) Config {
+	if c.Uppercase == 0 {
+		c.Uppercase = 'X'
+	}
+	if c.Lowercase == 0 {
+		c.Lowercase = 'x'
+	}
+	if c.Digit == 0 {
+		c.Digit = '0'
+	}
+	return c
+}
+
 // Mask the given span in the slice of runes.
-func mask(runes []rune, span span) {
+func mask(runes []rune, span span, c Config) {
 	for i := span.start; i < span.end; i++ {
-		c := runes[i]
-		isUpper := unicode.IsUpper(c)
+		r := runes[i]
+		isUpper := unicode.IsUpper(r)
 		if isUpper {
-			runes[i] = 'X'
+			runes[i] = c.Uppercase
 		} else {
-			runes[i] = 'x'
+			runes[i] = c.Lowercase
 		}
 	}
 }
