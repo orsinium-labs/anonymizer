@@ -10,13 +10,15 @@ func TestAnonymize_Default(t *testing.T) {
 	t.Parallel()
 	is := is.New(t)
 	a := New(nil)
-	is.Equal(a.Anonymize("Albert"), "Xxxxxx")
-	is.Equal(a.Anonymize("MyLoKo"), "XxXxXx")
+	is.Equal(a.Anonymize("Albert"), "█▄▄▄▄▄")
+	is.Equal(a.Anonymize("Albert hello"), "█▄▄▄▄▄ hello")
+	is.Equal(a.Anonymize("Hello Albert"), "Hello █▄▄▄▄▄")
+	is.Equal(a.Anonymize("Hello, Albert. How are you?"), "Hello, █▄▄▄▄▄. How are you?")
+	is.Equal(a.Anonymize("MyLoKo"), "█▄█▄█▄")
 	is.Equal(a.Anonymize("12 34"), "00 00")
 	is.Equal(a.Anonymize("12-34"), "00-00")
-	is.Equal(a.Anonymize("Lelystad"), "Xxxxxxxx")
-	is.Equal(a.Anonymize("Flёur"), "Xxxxx")
-	is.Equal(a.Anonymize("Good morning, doctor. My name is Gram. I live in amsterdam, at kerkstraat 42. My social number is 123-456."), "Xxxxx")
+	is.Equal(a.Anonymize("Lelystad"), "█▄▄▄▄▄▄▄")
+	is.Equal(a.Anonymize("Flёur"), "█▄▄▄▄")
 }
 
 func TestAnonymize_Dutch(t *testing.T) {
@@ -26,17 +28,17 @@ func TestAnonymize_Dutch(t *testing.T) {
 	is.NoErr(err)
 	a := New(d)
 
-	is.Equal(a.Anonymize("Albert"), "Xxxxxx")
-	is.Equal(a.Anonymize("hoi Albert!"), "hoi Xxxxxx!")
-	is.Equal(a.Anonymize("Hoi Albert!"), "Hoi Xxxxxx!")
-	is.Equal(a.Anonymize("Hoi Hoi!"), "Hoi Xxx!")
-	is.Equal(a.Anonymize("hoe gaat het, asdasd?"), "hoe gaat het, xxxxxx?")
+	is.Equal(a.Anonymize("Albert"), "█▄▄▄▄▄")
+	is.Equal(a.Anonymize("hoi Albert!"), "hoi █▄▄▄▄▄!")
+	is.Equal(a.Anonymize("Hoi Albert!"), "Hoi █▄▄▄▄▄!")
+	is.Equal(a.Anonymize("Hoi Hoi!"), "Hoi █▄▄!")
+	is.Equal(a.Anonymize("hoe gaat het, asdasd?"), "hoe gaat het, ▄▄▄▄▄▄?")
 
-	is.Equal(a.Anonymize("MyLoKo"), "XxXxXx")
+	is.Equal(a.Anonymize("MyLoKo"), "█▄█▄█▄")
 	is.Equal(a.Anonymize("12 34"), "00 00")
 	is.Equal(a.Anonymize("12-34"), "00-00")
-	is.Equal(a.Anonymize("Lelystad"), "Xxxxxxxx")
-	is.Equal(a.Anonymize("Flёur"), "Xxxxx")
+	is.Equal(a.Anonymize("Lelystad"), "█▄▄▄▄▄▄▄")
+	is.Equal(a.Anonymize("Flёur"), "█▄▄▄▄")
 }
 
 func TestIterWords(t *testing.T) {

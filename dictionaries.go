@@ -9,6 +9,7 @@ import (
 	"github.com/derekparker/trie"
 )
 
+// Dictionary of words.
 type Dict = trie.Trie
 
 const (
@@ -56,6 +57,11 @@ func initInstalled() error {
 	return nil
 }
 
+// Load dictionary for the given language.
+//
+// If the language is not found or not provided,
+// the default one will be used. Run `sudo select-default-wordlist`
+// to change the system default.
 func LoadDict(lang string) (*Dict, error) {
 	path := findDict(lang)
 	return loadDict(path)

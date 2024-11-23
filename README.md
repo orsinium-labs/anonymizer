@@ -12,7 +12,7 @@ Input:
 
 Output:
 
-> Good morning, doctor. My name is Xxxx. I live in xxxxxxxxx, at xxxxxxxxxx 00. My social number is 000-000.
+> Good morning, doctor. My name is █▄▄▄. I live in ▄▄▄▄▄▄▄▄▄, at ▄▄▄▄▄▄▄▄▄▄ 00. My social number is 000-000.
 
 ## Installation
 
@@ -39,11 +39,17 @@ sudo apt install aptitude
 aptitude search '?provides(wordlist)'
 ```
 
+If the language is not found or not provided, the default one will be used. Run `sudo select-default-wordlist` to change the system default.
+
 ## Usage
 
 ```go
 input := "Hi, my name is Gram."
-a := anonymizer.New()
+dict, err := anonymizer.LoadDict("en")
+if err != nil {
+    panic(err)
+}
+a := anonymizer.New(dict)
 a.Language = "en"
 output := a.Anonymize(input)
 fmt.Println(output)

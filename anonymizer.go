@@ -10,10 +10,14 @@ import (
 )
 
 type Anonymizer struct {
-	Dict      *Dict
+	// The dictionary to use to see if a word is a dictionary word.
+	Dict *Dict
+	// The placeholder to use instead of uppercase letters.
 	Uppercase rune
+	// The placeholder to use instead of lowercase letters.
 	Lowercase rune
-	Digit     rune
+	// The placeholder to use instead of digits.
+	Digit rune
 }
 
 func New(dict *Dict) Anonymizer {
@@ -26,8 +30,8 @@ func New(dict *Dict) Anonymizer {
 	}
 	return Anonymizer{
 		Dict:      dict,
-		Uppercase: 'X',
-		Lowercase: 'x',
+		Uppercase: '█',
+		Lowercase: '▄',
 		Digit:     '0',
 	}
 }
