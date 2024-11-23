@@ -10,11 +10,20 @@ import (
 	"github.com/derekparker/trie"
 )
 
-type Config struct {
-	Langugage string
-	Uppercase rune
-	Lowercase rune
-	Digit     rune
+type Anonymizer struct {
+	Dictionary *trie.Trie
+	Langugage  string
+	Uppercase  rune
+	Lowercase  rune
+	Digit      rune
+}
+
+func NewAnonymizer() Anonymizer {
+	return Anonymizer{
+		Uppercase: 'X',
+		Lowercase: 'x',
+		Digit:     '0',
+	}
 }
 
 //go:embed words/nl.txt
@@ -34,47 +43,35 @@ func init() {
 }
 
 // Replace with a placeholder all non-dictionary words in the text.
-func Anonymize(text string, c Config) string {
-	c = initConfig(c)
-	// We work with binary instead of strings to reduce memory allocations.
+func (a Anonymizer) Anonymize(text string) string {
 	runes := []rune(text)
 	for i, r := range runes {
 		if unicode.IsDigit(r) {
-			runes[i] = c.Digit
+			runes[i] = a.Digit
 		}
 	}
-	dict := getDict()
+	dict := a.Dictionary
+	if dict == nil {
+		dict = getDict()
+	}
 	for span := range iterWords(runes) {
 		if !shouldAnonymize(dict, runes, span) {
 			continue
 		}
-		mask(runes, span, c)
+		a.mask(runes, span)
 	}
 	return string(runes)
 }
 
-func initConfig(c Config) Config {
-	if c.Uppercase == 0 {
-		c.Uppercase = 'X'
-	}
-	if c.Lowercase == 0 {
-		c.Lowercase = 'x'
-	}
-	if c.Digit == 0 {
-		c.Digit = '0'
-	}
-	return c
-}
-
 // Mask the given span in the slice of runes.
-func mask(runes []rune, span span, c Config) {
+func (a Anonymizer) mask(runes []rune, span span) {
 	for i := span.start; i < span.end; i++ {
 		r := runes[i]
 		isUpper := unicode.IsUpper(r)
 		if isUpper {
-			runes[i] = c.Uppercase
+			runes[i] = a.Uppercase
 		} else {
-			runes[i] = c.Lowercase
+			runes[i] = a.Lowercase
 		}
 	}
 }
