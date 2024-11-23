@@ -1,9 +1,12 @@
 package anonymizer
 
 import (
+	"bytes"
+	"embed"
 	_ "embed"
+	"errors"
+	"fmt"
 	"iter"
-	"strings"
 	"sync"
 	"unicode"
 
@@ -26,20 +29,44 @@ func New() Anonymizer {
 	}
 }
 
-//go:embed words/nl.txt
-var dutch string
+//go:embed words/*.txt
+var words embed.FS
 
-var getDict = sync.OnceValue(func() *trie.Trie {
-	dict := trie.New()
-	for _, word := range strings.Split(dutch, "\n") {
-		dict.Add(word, nil)
+var getDicts = sync.OnceValue(func() map[string]*trie.Trie {
+	loadDicts := func() (map[string]*trie.Trie, error) {
+		langs, err := words.ReadDir("words")
+		if err != nil {
+			return nil, fmt.Errorf("read words dir: %v", err)
+		}
+		if len(langs) == 0 {
+			return nil, errors.New("no files found in the words dir")
+		}
+		dicts := make(map[string]*trie.Trie)
+		for _, langWords := range langs {
+			filePath := "words/" + langWords.Name()
+			rawFile, err := words.ReadFile(filePath)
+			if err != nil {
+				return nil, fmt.Errorf("read %s: %v", filePath, err)
+			}
+			dict := trie.New()
+			for _, word := range bytes.Split(rawFile, []byte{'\n'}) {
+				dict.Add(string(word), nil)
+			}
+			lang := langWords.Name()[:2]
+			dicts[lang] = dict
+		}
+		words = embed.FS{}
+		return dicts, nil
 	}
-	dutch = ""
-	return dict
+	dicts, err := loadDicts()
+	if err != nil {
+		panic(fmt.Errorf("failed to load dictionaries: %v", err))
+	}
+	return dicts
 })
 
 func init() {
-	go getDict()
+	go getDicts()
 }
 
 // Replace with a placeholder all non-dictionary words in the text.
@@ -50,16 +77,25 @@ func (a Anonymizer) Anonymize(text string) string {
 			runes[i] = a.Digit
 		}
 	}
-	dict := a.Dictionary
-	if dict == nil {
-		dict = getDict()
-	}
+	dict := a.getDict()
 	for span := range iterWords(runes) {
 		if shouldAnonymize(dict, span) {
 			a.mask(runes, span)
 		}
 	}
 	return string(runes)
+}
+
+func (a Anonymizer) getDict() *trie.Trie {
+	if a.Dictionary != nil {
+		return a.Dictionary
+	}
+	dicts := getDicts()
+	dict := dicts[a.Langugage]
+	if dict != nil {
+		return dict
+	}
+	return dicts["nl"]
 }
 
 // Mask the given span in the slice of runes.
