@@ -2,7 +2,6 @@ package anonymizer
 
 import (
 	_ "embed"
-	"fmt"
 	"iter"
 	"unicode"
 
@@ -22,11 +21,7 @@ type Anonymizer struct {
 
 func New(dict *Dict) Anonymizer {
 	if dict == nil {
-		var err error
-		dict, err = LoadDict("")
-		if err != nil {
-			panic(fmt.Errorf("failed to load default dictionary: %v", err))
-		}
+		dict = MustLoadDict("")
 	}
 	return Anonymizer{
 		Dict:      dict,

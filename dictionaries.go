@@ -57,6 +57,15 @@ func initInstalled() error {
 	return nil
 }
 
+// A wrapper around [LoadDict] that panics on error.
+func MustLoadDict(lang string) *Dict {
+	dict, err := LoadDict(lang)
+	if err != nil {
+		panic(fmt.Errorf("load dictionary: %v", err))
+	}
+	return dict
+}
+
 // Load dictionary for the given language.
 //
 // If the language is not found or not provided,
@@ -87,6 +96,7 @@ func loadDict(path string) (*Dict, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open %s: %v", path, err)
 	}
+	defer file.Close()
 	dict := trie.New()
 	scanner := bufio.NewScanner(file)
 	// optionally, resize scanner's capacity for lines over 64K, see next example
