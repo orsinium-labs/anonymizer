@@ -55,10 +55,9 @@ func (a Anonymizer) Anonymize(text string) string {
 		dict = getDict()
 	}
 	for span := range iterWords(runes) {
-		if !shouldAnonymize(dict, runes, span) {
-			continue
+		if shouldAnonymize(dict, runes, span) {
+			a.mask(runes, span)
 		}
-		a.mask(runes, span)
 	}
 	return string(runes)
 }
@@ -78,11 +77,11 @@ func (a Anonymizer) mask(runes []rune, span span) {
 
 // Check if the word in the given span should be anonymized.
 func shouldAnonymize(dict *trie.Trie, runes []rune, span span) bool {
-	word := runes[span.start:span.end]
 	// If the first letter is uppercase and it's the beginning of a sentence,
-	// we want to make it lowercase
-	if unicode.IsUpper(runes[span.start]) {
-		if isSentenceStart(runes, span.start) {
+	// we want to make it lowercase.
+	word := span.word
+	if unicode.IsUpper(word[0]) {
+		if span.initial {
 			word = append([]rune{unicode.ToLower(word[0])}, word[1:]...)
 		}
 	}
@@ -90,45 +89,53 @@ func shouldAnonymize(dict *trie.Trie, runes []rune, span span) bool {
 	return !knownWord
 }
 
-// Detect if the character at the given position is the first in a sentence.
-func isSentenceStart(runes []rune, i int) bool {
-	if i < 2 {
-		return true
-	}
-	for j := i - 1; j >= 0; j-- {
-		r := runes[j]
-		if !unicode.IsSpace(r) {
-			return unicode.In(r, unicode.Sentence_Terminal)
-		}
-	}
-	return true
-}
-
 type span struct {
+	// The index of the first rune of the word.
 	start int
-	end   int
+	// The index of the first rune after the word.
+	end int
+	// The star of the show, the complete word in its original case.
+	word []rune
+	// True if it is the first word of a sentence.
+	initial bool
 }
 
 func iterWords(runes []rune) iter.Seq[span] {
 	return func(yield func(span) bool) {
 		start := 0
 		end := 0
+		terminal := -2
 		for i, r := range runes {
 			if unicode.IsLetter(r) {
 				end = i + 1
-			} else {
-				if start < end {
-					keepGoing := yield(span{start, end})
-					if !keepGoing {
-						break
-					}
-				}
-				start = i + 1
+				continue
 			}
+			if start < end {
+				keepGoing := yield(span{
+					start:   start,
+					end:     end,
+					word:    runes[start:end],
+					initial: terminal != -1,
+				})
+				if !keepGoing {
+					break
+				}
+			}
+			if unicode.In(r, unicode.Sentence_Terminal) {
+				terminal = i
+			} else if terminal != -1 && !unicode.IsSpace(r) {
+				terminal = -1
+			}
+			start = i + 1
 		}
 
 		if start < end {
-			yield(span{start, end})
+			yield(span{
+				start:   start,
+				end:     end,
+				word:    runes[start:end],
+				initial: terminal != -1,
+			})
 		}
 	}
 }
