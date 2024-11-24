@@ -1,8 +1,8 @@
 module github.com/orsinium-labs/anonymizer
 
-go 1.23.0
+go 1.23.3
 
 require (
-	github.com/derekparker/trie v0.0.0-20230829180723-39f4de51ef7d
+	github.com/derekparker/trie/v3 v3.0.0-20240916174412-4095f8e392f7
 	github.com/matryer/is v1.4.1
 )
