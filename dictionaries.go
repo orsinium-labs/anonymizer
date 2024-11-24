@@ -6,11 +6,11 @@ import (
 	"os"
 	"unicode"
 
-	"github.com/derekparker/trie"
+	"github.com/derekparker/trie/v3"
 )
 
 // Dictionary of words.
-type Dict = trie.Trie
+type Dict = trie.Trie[struct{}]
 
 const (
 	dictDir     = "/usr/share/dict/"
@@ -35,7 +35,7 @@ var languages = map[string]string{
 	"pt": "portuguese",
 	"es": "spanish",
 	"sv": "swedish",
-	"ua": "ukrainian",
+	"uk": "ukrainian",
 }
 
 func init() {
@@ -97,13 +97,13 @@ func loadDict(path string) (*Dict, error) {
 		return nil, fmt.Errorf("open %s: %v", path, err)
 	}
 	defer file.Close()
-	dict := trie.New()
+	dict := trie.New[struct{}]()
 	scanner := bufio.NewScanner(file)
 	// optionally, resize scanner's capacity for lines over 64K, see next example
 	for scanner.Scan() {
 		word := scanner.Text()
 		if isLower(word) {
-			dict.Add(word, nil)
+			dict.Add(word, struct{}{})
 		}
 	}
 	return dict, nil

@@ -4,8 +4,6 @@ import (
 	_ "embed"
 	"iter"
 	"unicode"
-
-	"github.com/derekparker/trie"
 )
 
 type Anonymizer struct {
@@ -61,7 +59,7 @@ func (a Anonymizer) mask(runes []rune, span span) {
 }
 
 // Check if the word in the given span should be anonymized.
-func shouldAnonymize(dict *trie.Trie, span span) bool {
+func shouldAnonymize(dict *Dict, span span) bool {
 	word := span.word
 	if unicode.IsUpper(word[0]) {
 		if span.initial {
